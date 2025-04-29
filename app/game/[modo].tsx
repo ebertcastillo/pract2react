@@ -1,10 +1,22 @@
 import { useLocalSearchParams } from "expo-router";
-import { View, Text, Pressable, StyleSheet } from "react-native";
+import { View, Text, Pressable, StyleSheet, Animated } from "react-native";
 import React, { useState, useEffect } from "react";
 
 export default function Game() {
   const { modo, jugadorX, jugadorO } = useLocalSearchParams();
   const esOscuro = modo === 'negro'; // Determinamos si es modo oscuro
+
+  // Animación de transición (opacidad)
+  const fadeAnim = useState(new Animated.Value(0))[0];  // Inicializamos en 0 (invisible)
+
+  useEffect(() => {
+    // Animar al aparecer cuando el componente se monta
+    Animated.timing(fadeAnim, {
+      toValue: 1,  // De 0 (invisible) a 1 (visible)
+      duration: 1000,  // Duración de la animación
+      useNativeDriver: true,  // Habilitar el uso del driver nativo para mayor rendimiento
+    }).start();
+  }, [esOscuro]); // Esto se vuelve a activar cuando cambia el modo (oscuro/claro)
 
   // Tablero de juego
   const emptyBoard = Array<string | null>(9).fill(null);
@@ -49,7 +61,7 @@ export default function Game() {
   }
 
   return (
-    <View style={[styles.container, esOscuro ? styles.oscuro : styles.claro]}>
+    <Animated.View style={[styles.container, esOscuro ? styles.oscuro : styles.claro, { opacity: fadeAnim }]}>
       <Text style={[styles.titles, esOscuro ? styles.tituloOscuro : styles.tituloClaro]}>
         {`Tres en Raya, Modo: ${esOscuro ? 'Oscuro' : 'Claro'}`}
       </Text>
@@ -92,7 +104,7 @@ export default function Game() {
           <Text>Reiniciar</Text>
         </Pressable>
       )}
-    </View>
+    </Animated.View>
   );
 }
 
